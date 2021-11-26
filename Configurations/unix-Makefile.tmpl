@@ -555,7 +555,7 @@ CRYPTO_MK_FILE=$(INSTALLTOP)/tassl_demo/crypto/mk
 
 install_tass:
 	rm -rf $(GEN_SM2_CERT_FILE).sh
-	cp -R tassl_demo/ $(INSTALLTOP)/
+	cp -R tassl_demo $(INSTALLTOP)/
 	mv $(GEN_SM2_CERT_FILE).tmpl $(GEN_SM2_CERT_FILE).sh
 	mv $(SSL_MK_FILE).tmpl $(SSL_MK_FILE).sh
 	mv $(CRYPTO_MK_FILE).tmpl $(CRYPTO_MK_FILE).sh
