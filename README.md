@@ -11,4 +11,4 @@
 
 5、新增支持标准版本apache。新版本tassl可与标准apache实现国密SSL的web server/反向代理；同时支持使用江南天安硬件产品(密码机/密码卡)存储SSL长期密钥，以保证密钥安全性
 
-用法参考%E8%BD%AF%E7%AE%97%E6%B3%95%E6%94%AF%E6%8C%81SSL%E5%8D%B8%E8%BD%BD%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97v1.02(%E6%A0%87%E5%87%86nginx).pdf
+使用请参考《软算法支持SSL卸载使用指南v1.02(标准nginx).pdf》
