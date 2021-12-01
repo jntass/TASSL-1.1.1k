@@ -1844,7 +1844,7 @@ MSG_PROCESS_RETURN tls_process_server_certificate(SSL *s, PACKET *pkt)
     unsigned long cert_list_len, cert_len;
     X509 *x = NULL, *x_enc = NULL;
     const unsigned char *certstart, *certbytes;
-    STACK_OF(X509) *sk = NULL;
+    STACK_OF(X509) *sk = NULL, *sk_enc = NULL;
     EVP_PKEY *pkey = NULL;
     size_t chainidx, certidx;
     unsigned int context = 0;
@@ -1948,13 +1948,6 @@ MSG_PROCESS_RETURN tls_process_server_certificate(SSL *s, PACKET *pkt)
         goto err;
     }
 
-    s->session->peer_chain = sk;
-    /*
-     * Inconsistency alert: cert_chain does include the peer's certificate,
-     * which we don't include in statem_srvr.c
-     */
-    x = sk_X509_value(sk, 0);
-
     if (s->version == SM1_1_VERSION) {
         /* Last certificate from peer with X509v3_KU_DATA_ENCIPHERMENT 
          * is used as encrypt certificate in GMTLS, not include first
@@ -1972,7 +1965,51 @@ MSG_PROCESS_RETURN tls_process_server_certificate(SSL *s, PACKET *pkt)
                         SSL_R_UNABLE_TO_FIND_ENC_CERT);
             goto err;
         }
+
+        /* Build encrypt certificate chain */
+        if ((sk_enc = sk_X509_new_null()) == NULL) {
+            SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PROCESS_SERVER_CERTIFICATE,
+                        ERR_R_MALLOC_FAILURE);
+            goto err;
+        }
+        if (!sk_X509_push(sk_enc, x_enc)) {
+            SSLfatal(s, SSL_AD_INTERNAL_ERROR,
+                        SSL_F_TLS_PROCESS_SERVER_CERTIFICATE,
+                        ERR_R_MALLOC_FAILURE);
+            goto err;
+        }
+        X509_up_ref(x_enc);
+        for (i = 1; i < sk_X509_num(sk); i++) {
+            if (!sk_X509_push(sk_enc, sk_X509_value(sk, i))) {
+                SSLfatal(s, SSL_AD_INTERNAL_ERROR,
+                            SSL_F_TLS_PROCESS_SERVER_CERTIFICATE,
+                            ERR_R_MALLOC_FAILURE);
+                goto err;
+            }
+            X509_up_ref(sk_X509_value(sk, i));
+        }
+
+        /* Verify encrypt certificate */
+        i = ssl_verify_cert_chain(s, sk_enc);
+        if (s->verify_mode != SSL_VERIFY_NONE && i <= 0) {
+            SSLfatal(s, ssl_x509err2alert(s->verify_result),
+                        SSL_F_TLS_PROCESS_SERVER_CERTIFICATE,
+                        SSL_R_CERTIFICATE_VERIFY_FAILED);
+            goto err;
+        }
+        ERR_clear_error();          /* but we keep s->verify_result */
+        if (i > 1) {
+            SSLfatal(s, SSL_AD_HANDSHAKE_FAILURE,
+                        SSL_F_TLS_PROCESS_SERVER_CERTIFICATE, i);
+            goto err;
+        }
     }
+    s->session->peer_chain = sk;
+    /*
+     * Inconsistency alert: cert_chain does include the peer's certificate,
+     * which we don't include in statem_srvr.c
+     */
+    x = sk_X509_value(sk, 0);
     sk = NULL;
 
     pkey = X509_get0_pubkey(x);
@@ -2034,6 +2071,7 @@ MSG_PROCESS_RETURN tls_process_server_certificate(SSL *s, PACKET *pkt)
     X509_free(x);
     X509_free(x_enc);
     sk_X509_pop_free(sk, X509_free);
+    sk_X509_pop_free(sk_enc, X509_free);
     return ret;
 }
 
