@@ -158,12 +158,15 @@ int pkcs7_main(int argc, char **argv)
 #ifndef OPENSSL_NO_CNSM
     /* for decode GMT 0009/0010 envelop key
      * add by ysc at 20210309*/
-    sign_pkey = load_key(in_sign_key, in_sign_key_format, 1, NULL, e, "Private Key");
-    if( NULL == sign_pkey )
+    if( GMT0009 || GMT0010 )
     {
-        BIO_printf(bio_err, "unable to load Key\n");
-        ERR_print_errors(bio_err);
-        goto end;
+        sign_pkey = load_key(in_sign_key, in_sign_key_format, 1, NULL, e, "Private Key");
+        if( NULL == sign_pkey )
+        {
+            BIO_printf(bio_err, "unable to load Key\n");
+            ERR_print_errors(bio_err);
+            goto end;
+        }
     }
 
     if( GMT0009 )
