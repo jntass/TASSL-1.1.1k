@@ -17,6 +17,10 @@
 
 #  include <openssl/ec.h>
 
+# ifdef  __cplusplus
+extern "C" {
+# endif
+
 typedef struct SM2_Ciphertext_st SM2_Ciphertext;
 DECLARE_ASN1_FUNCTIONS(SM2_Ciphertext)
 
@@ -106,5 +110,9 @@ int SM2Kap_compute_key(void *out, size_t outlen, int responsor,\
     const EVP_MD *md);
 
 int ECDSA_sm2_get_Z(const EC_KEY *ec_key, const EVP_MD *md, const char *uid, int uid_len, unsigned char *z_buf, size_t *z_len);
+# ifdef __cplusplus
+}
+# endif
+
 # endif /* OPENSSL_NO_SM2 */
 #endif
