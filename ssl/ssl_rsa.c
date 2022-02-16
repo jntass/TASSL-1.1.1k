@@ -140,13 +140,11 @@ static int ssl_set_pkey(CERT *c, EVP_PKEY *pkey)
     }
 
     if (SSL_PKEY_SM2 == i) {
-        /* For GMTLS, sign certificate must 
-         * be set before sign key set; enc 
-         * certificate must be set before 
-         * enc key set */
-        if (c->pkeys[SSL_PKEY_SM2].x509 != NULL && c->pkeys[SSL_PKEY_SM2].privatekey == NULL)
+        /* For GMTLS, sign key must 
+         * be set before enc key */
+        if (c->pkeys[SSL_PKEY_SM2].privatekey == NULL)
           i = SSL_PKEY_SM2;
-        else if (c->pkeys[SSL_PKEY_SM2_ENC].x509 != NULL && c->pkeys[SSL_PKEY_SM2_ENC].privatekey == NULL)
+        else if (c->pkeys[SSL_PKEY_SM2_ENC].privatekey == NULL)
           i = SSL_PKEY_SM2_ENC;
         else
         {
@@ -349,11 +347,11 @@ static int ssl_set_cert(CERT *c, X509 *x)
 
     if (SSL_PKEY_SM2 == i) {
         if (x && (X509_get_extension_flags(x) & EXFLAG_KUSAGE) && 
-                    (X509_get_key_usage(x) & (X509v3_KU_DIGITAL_SIGNATURE))) 
-          i = SSL_PKEY_SM2; /* GMTLS sign certificate*/
+                    (X509_get_key_usage(x) & X509v3_KU_GM_SIGN)) 
+          i = SSL_PKEY_SM2; /* GMTLS sign certificate */
         else if (x && (X509_get_extension_flags(x) & EXFLAG_KUSAGE) && 
-                    (X509_get_key_usage(x) & (X509v3_KU_KEY_ENCIPHERMENT | X509v3_KU_DATA_ENCIPHERMENT | X509v3_KU_KEY_AGREEMENT))) 
-          i = SSL_PKEY_SM2_ENC; /* GMTLS encrypt certificate*/
+                    (X509_get_key_usage(x) & X509v3_KU_GM_ENC)) 
+          i = SSL_PKEY_SM2_ENC; /* GMTLS encrypt certificate */
         else 
         {
             SSLerr(SSL_F_SSL_SET_CERT, SSL_R_UNKNOWN_GM_CERTIFICATE_TYPE);

@@ -393,14 +393,19 @@ int PEM_ASN1_write_bio(i2d_of_void *i2d, const char *name, BIO *bp,
         ret = 1;
         buf[0] = '\0';
     }
-#ifndef OPENSSL_NO_CNSM					//add by gujq on 20190830 for tasshsm engine v0.6
-		if(strcmp(name, PEM_STRING_ECPRIVATEKEY) == 0){
-			if(EC_KEY_get_flags((EC_KEY*)x) & EC_FLAG_TASSHSM_ENGINE){
+#ifndef OPENSSL_NO_CNSM
+    if(strcmp(name, PEM_STRING_ECPRIVATEKEY) == 0){
+        if(EC_KEY_get_flags((EC_KEY*)x) & EC_FLAG_TASSHSM_ENGINE){
             name = PEM_STRING_TASSHSM_ECPRIVATEKEY;
-    	}
-    	if(EC_KEY_get_flags((EC_KEY*)x) & EC_FLAG_TASSCARD_ENGINE){
+        }
+        if(EC_KEY_get_flags((EC_KEY*)x) & EC_FLAG_TASSCARD_ENGINE){
             name = PEM_STRING_TASSCARD_ECPRIVATEKEY;
-    	}
+        }
+    }
+    if(strcmp(name, PEM_STRING_RSA) == 0){
+        if(RSA_test_flags((RSA*)x, RSA_FLAG_TASSHSM_ENGINE)){
+            name = PEM_STRING_TASSHSM_RSA;
+        }
     }
 #endif
 

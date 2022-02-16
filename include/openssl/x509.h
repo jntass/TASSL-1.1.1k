@@ -56,6 +56,10 @@ extern "C" {
 # define X509v3_KU_DECIPHER_ONLY         0x8000
 # define X509v3_KU_UNDEF                 0xffff
 
+/* GMTLS certificate key usage refer to GM/T 0015-2012, Section 5.2.4.2.4 */
+# define X509v3_KU_GM_SIGN (X509v3_KU_DIGITAL_SIGNATURE | X509v3_KU_NON_REPUDIATION)
+# define X509v3_KU_GM_ENC (X509v3_KU_KEY_ENCIPHERMENT | X509v3_KU_DATA_ENCIPHERMENT | X509v3_KU_ENCIPHER_ONLY | X509v3_KU_DECIPHER_ONLY)
+
 struct X509_algor_st {
     ASN1_OBJECT *algorithm;
     ASN1_TYPE *parameter;

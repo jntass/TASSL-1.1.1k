@@ -4036,12 +4036,12 @@ MSG_PROCESS_RETURN tls_process_client_certificate(SSL *s, PACKET *pkt)
             goto err;
         }
         if (s->version == SM1_1_VERSION) {
-            /* Last certificate from peer with X509v3_KU_DATA_ENCIPHERMENT 
+            /* Last certificate from peer with encrypt key usage 
              * is used as encrypt certificate in GMTLS, not include first
              * certificate which is used as signature certificate */
             for (i = sk_X509_num(sk) - 1; i > 0; i--) {
                 if((X509_get_extension_flags(sk_X509_value(sk, i)) & EXFLAG_KUSAGE)
-                            && (X509_get_key_usage(sk_X509_value(sk, i)) & X509v3_KU_DATA_ENCIPHERMENT))
+                            && (X509_get_key_usage(sk_X509_value(sk, i)) & X509v3_KU_GM_ENC))
                 {
                     x_enc = sk_X509_value(sk, i);
                     break;

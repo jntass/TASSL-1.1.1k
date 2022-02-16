@@ -2807,13 +2807,6 @@ int tls_choose_sigalg(SSL *s, int fatalerrs)
                     if (lu->sig == EVP_PKEY_RSA_PSS) {
                         /* validate that key is large enough for the signature algorithm */
                         EVP_PKEY *pkey = s->cert->pkeys[sig_idx].privatekey;
-#ifndef OPENSSL_NO_CNSM
-												ENGINE *tmp_e = NULL;
-												tmp_e = EVP_PKEY_pmeth_engine(pkey);
-                        if(tmp_e != NULL && strcmp(ENGINE_get_id(tmp_e), "tasshsm_rsa") == 0){     //line 3043 tasshsm_rsa 引擎不支持pss模式，由于evsm封装比较麻烦，暂不支持
-                        	continue;
-                        }
-#endif
                         if (!rsa_pss_check_min_key_size(EVP_PKEY_get0(pkey), lu))
                             continue;
                     }
