@@ -549,12 +549,12 @@ install_docs: install_man_docs install_html_docs
 uninstall_docs: uninstall_man_docs uninstall_html_docs
 	$(RM) -r "$(DESTDIR)$(DOCDIR)"
 
-GEN_SM2_CERT_FILE=$(INSTALLTOP)/tassl_demo/cert/gen_sm2_cert
-SSL_MK_FILE=$(INSTALLTOP)/tassl_demo/ssl/mk
-CRYPTO_MK_FILE=$(INSTALLTOP)/tassl_demo/crypto/mk
+GEN_SM2_CERT_FILE=$(DESTDIR)$(INSTALLTOP)/tassl_demo/cert/gen_sm2_cert
+SSL_MK_FILE=$(DESTDIR)$(INSTALLTOP)/tassl_demo/ssl/mk
+CRYPTO_MK_FILE=$(DESTDIR)$(INSTALLTOP)/tassl_demo/crypto/mk
 
 install_tass:
-	cp -R tassl_demo $(INSTALLTOP)/
+	cp -R tassl_demo $(DESTDIR)$(INSTALLTOP)/
 	
 	echo "#!/bin/sh"                                                  >  $(GEN_SM2_CERT_FILE).sh
 	echo "export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(INSTALLTOP)/lib" >> $(GEN_SM2_CERT_FILE).sh
