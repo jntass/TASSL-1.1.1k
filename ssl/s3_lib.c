@@ -2735,6 +2735,23 @@ static SSL_CIPHER ssl3_ciphers[] = {
      128,
      128,
      },
+     /* Cipher E053 */
+     {
+     1,
+     TLS1_TXT_ECC_WITH_SM4_GCM_SM3,
+     NULL,
+     TLS1_CK_ECC_WITH_SM4_GCM_SM3,
+     SSL_kSM2,
+     SSL_aSM2DSA,
+     SSL_SM4GCM,
+     SSL_AEAD,
+     SM1_1_VERSION, SM1_1_VERSION,
+     0, 0,
+     SSL_HIGH,
+     SSL_HANDSHAKE_MAC_SM3 | TLS1_PRF_SM3,
+     128,
+     128,
+     },
 #endif
 
 #ifndef OPENSSL_NO_IDEA
@@ -4990,9 +5007,9 @@ int ssl_derive_SM2(SSL *s, EVP_PKEY *privkey, EVP_PKEY *pubkey,  int gensecret)
     }
 
 #ifdef STD_ZAZB
-    if (1 != EVP_PKEY_CTX_set_responsor(pctx, s->server) || //¹úÃÜ±ê×¼¶¨ÒåZAZB
+    if (1 != EVP_PKEY_CTX_set_responsor(pctx, s->server) || //ï¿½ï¿½ï¿½Ü±ï¿½×¼ï¿½ï¿½ï¿½ï¿½ZAZB
 #else
-    if (1 != EVP_PKEY_CTX_set_responsor(pctx, !s->server) || //¹úÃÜ¾ÖÄ¬ÈÏË³ÐòZBZA
+    if (1 != EVP_PKEY_CTX_set_responsor(pctx, !s->server) || //ï¿½ï¿½ï¿½Ü¾ï¿½Ä¬ï¿½ï¿½Ë³ï¿½ï¿½ZBZA
 #endif
                 1 != EVP_PKEY_CTX_set1_ekey(pctx, privkey) || 
                 1 != EVP_PKEY_CTX_set1_peer_ekey(pctx, pubkey)) {
@@ -5001,7 +5018,7 @@ int ssl_derive_SM2(SSL *s, EVP_PKEY *privkey, EVP_PKEY *pubkey,  int gensecret)
         return 0;
     }
 
-    local_e_sm4 = ENGINE_get_cipher_engine(NID_sm4_cbc);        //Èç¹û¼ÓÔØÁËSM4ÒýÇæ£¬ÔòÐ­ÉÌÃÜÎÄµÄpremasterkey£»Èç¹ûÃ»ÓÐ¼ÓÔØÔòÐ­ÉÌÃ÷ÎÄµÄpremasterkey
+    local_e_sm4 = ENGINE_get_cipher_engine(NID_sm4_cbc);        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½SM4ï¿½ï¿½ï¿½æ£¬ï¿½ï¿½Ð­ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½premasterkeyï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½Ð¼ï¿½ï¿½ï¿½ï¿½ï¿½Ð­ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½premasterkey
     if (local_e_sm4)
         EVP_PKEY_CTX_set_app_data(pctx, (void *)1);
     else
@@ -5029,7 +5046,7 @@ int ssl_derive_SM2(SSL *s, EVP_PKEY *privkey, EVP_PKEY *pubkey,  int gensecret)
 
             rv = rv && tls13_generate_handshake_secret(s, pms, pmslen);
         } else {
-            //Èç¹û´ËsslµÄË½Ô¿¼ÓÔØÁËsm2ÒýÇæ£¬ÔòÊ¹ÓÃÒýÇæ½øÐÐmasterkey¼ÆËã
+            //ï¿½ï¿½ï¿½ï¿½ï¿½sslï¿½ï¿½Ë½Ô¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½sm2ï¿½ï¿½ï¿½æ£¬ï¿½ï¿½Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½masterkeyï¿½ï¿½ï¿½ï¿½
             ENGINE *local_e_sm2 = NULL;
             EVP_PKEY * local_evp_ptr = NULL;
             local_evp_ptr = s->cert->pkeys[SSL_PKEY_SM2_ENC].privatekey;
@@ -5037,7 +5054,7 @@ int ssl_derive_SM2(SSL *s, EVP_PKEY *privkey, EVP_PKEY *pubkey,  int gensecret)
                 local_e_sm2 = EVP_PKEY_pmeth_engine(local_evp_ptr);
             if(local_evp_ptr && local_e_sm4){
                 if(local_e_sm2){
-                    ENGINE_set_tass_flags(local_e_sm4, TASS_FLAG_PRE_MASTER_KEY_CIPHER);       //µ÷ÓÃSM2ÒýÇæµÄECDHE-SM4-SM3Ì×¼þ£¬ÊÇÃÜÎÄµÄpremasterkey; ²»µ÷ÓÃSM2ÒýÇæµÄÎªÃ÷ÎÄpremasterkey
+                    ENGINE_set_tass_flags(local_e_sm4, TASS_FLAG_PRE_MASTER_KEY_CIPHER);       //ï¿½ï¿½ï¿½ï¿½SM2ï¿½ï¿½ï¿½ï¿½ï¿½ECDHE-SM4-SM3ï¿½×¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½premasterkey; ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½SM2ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½premasterkey
                     set_engine_flag = 1;
                 }
                 if(!(rv = ENGINE_ssl_generate_master_secret(local_e_sm4, s, pms, pmslen, 0))){
