@@ -1194,11 +1194,6 @@ static int ssl_add_sm2_cert_chain(SSL *s, WPACKET *pkt, CERT_PKEY *cpk, CERT_PKE
         if (!ssl_add_cert_to_wpacket(s, pkt, enc_cpk->x509, i + 1))
             return 0;
     }
-    else
-    {
-        SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_SSL_ADD_SM2_CERT_CHAIN, ERR_R_INTERNAL_ERROR);
-        return 0;
-    }
     
     return 1;
 }

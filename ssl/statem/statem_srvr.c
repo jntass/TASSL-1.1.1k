@@ -4035,7 +4035,8 @@ MSG_PROCESS_RETURN tls_process_client_certificate(SSL *s, PACKET *pkt)
                      SSL_R_UNKNOWN_CERTIFICATE_TYPE);
             goto err;
         }
-        if (s->version == SM1_1_VERSION) {
+        if (s->version == SM1_1_VERSION && 
+                    s->s3->tmp.new_cipher->algorithm_mkey & SSL_kSM2DH) {
             /* Last certificate from peer with encrypt key usage 
              * is used as encrypt certificate in GMTLS, not include first
              * certificate which is used as signature certificate */
