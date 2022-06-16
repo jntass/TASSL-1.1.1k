@@ -4035,8 +4035,7 @@ MSG_PROCESS_RETURN tls_process_client_certificate(SSL *s, PACKET *pkt)
                      SSL_R_UNKNOWN_CERTIFICATE_TYPE);
             goto err;
         }
-        if (s->version == SM1_1_VERSION && 
-                    s->s3->tmp.new_cipher->algorithm_mkey & SSL_kSM2DH) {
+        if (s->version == SM1_1_VERSION) { 
             /* Last certificate from peer with encrypt key usage 
              * is used as encrypt certificate in GMTLS, not include first
              * certificate which is used as signature certificate */
@@ -4048,47 +4047,49 @@ MSG_PROCESS_RETURN tls_process_client_certificate(SSL *s, PACKET *pkt)
                     break;
                 }
             }
-            if (!x_enc) {
+            if (!x_enc && s->s3->tmp.new_cipher->algorithm_mkey & SSL_kSM2DH) {
                 SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PROCESS_CLIENT_CERTIFICATE,
                             SSL_R_UNABLE_TO_FIND_ENC_CERT);
                 goto err;
             }
 
-            /* Build encrypt certificate chain */
-            if ((sk_enc = sk_X509_new_null()) == NULL) {
-                SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PROCESS_CLIENT_CERTIFICATE,
-                            ERR_R_MALLOC_FAILURE);
-                goto err;
-            }
-            if (!sk_X509_push(sk_enc, x_enc)) {
-                SSLfatal(s, SSL_AD_INTERNAL_ERROR,
-                            SSL_F_TLS_PROCESS_CLIENT_CERTIFICATE,
-                            ERR_R_MALLOC_FAILURE);
-                goto err;
-            }
-            X509_up_ref(x_enc);
-            for (i = 1; i < sk_X509_num(sk); i++) {
-                if (!sk_X509_push(sk_enc, sk_X509_value(sk, i))) {
+            if(x_enc) {
+                /* Build encrypt certificate chain */
+                if ((sk_enc = sk_X509_new_null()) == NULL) {
+                    SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PROCESS_CLIENT_CERTIFICATE,
+                                ERR_R_MALLOC_FAILURE);
+                    goto err;
+                }
+                if (!sk_X509_push(sk_enc, x_enc)) {
                     SSLfatal(s, SSL_AD_INTERNAL_ERROR,
                                 SSL_F_TLS_PROCESS_CLIENT_CERTIFICATE,
                                 ERR_R_MALLOC_FAILURE);
                     goto err;
                 }
-                X509_up_ref(sk_X509_value(sk, i));
-            }
+                X509_up_ref(x_enc);
+                for (i = 1; i < sk_X509_num(sk); i++) {
+                    if (!sk_X509_push(sk_enc, sk_X509_value(sk, i))) {
+                        SSLfatal(s, SSL_AD_INTERNAL_ERROR,
+                                    SSL_F_TLS_PROCESS_CLIENT_CERTIFICATE,
+                                    ERR_R_MALLOC_FAILURE);
+                        goto err;
+                    }
+                    X509_up_ref(sk_X509_value(sk, i));
+                }
 
-            /* Verify encrypt certificate */
-            i = ssl_verify_cert_chain(s, sk_enc);
-            if (i <= 0) {
-                SSLfatal(s, ssl_x509err2alert(s->verify_result),
-                            SSL_F_TLS_PROCESS_CLIENT_CERTIFICATE,
-                            SSL_R_CERTIFICATE_VERIFY_FAILED);
-                goto err;
-            }
-            if (i > 1) {
-                SSLfatal(s, SSL_AD_HANDSHAKE_FAILURE,
-                            SSL_F_TLS_PROCESS_CLIENT_CERTIFICATE, i);
-                goto err;
+                /* Verify encrypt certificate */
+                i = ssl_verify_cert_chain(s, sk_enc);
+                if (i <= 0) {
+                    SSLfatal(s, ssl_x509err2alert(s->verify_result),
+                                SSL_F_TLS_PROCESS_CLIENT_CERTIFICATE,
+                                SSL_R_CERTIFICATE_VERIFY_FAILED);
+                    goto err;
+                }
+                if (i > 1) {
+                    SSLfatal(s, SSL_AD_HANDSHAKE_FAILURE,
+                                SSL_F_TLS_PROCESS_CLIENT_CERTIFICATE, i);
+                    goto err;
+                }
             }
         }
     }

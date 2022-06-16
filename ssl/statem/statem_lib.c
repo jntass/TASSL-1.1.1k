@@ -1167,6 +1167,16 @@ static int ssl_add_sm2_cert_chain(SSL *s, WPACKET *pkt, CERT_PKEY *cpk, CERT_PKE
                 X509_STORE_CTX_free(xs_ctx);
                 return 0;
             }
+#ifndef ENC_CERT_LAST
+            if(i == 0) {
+                if ((enc_cpk != NULL) && (enc_cpk->x509 != NULL)) {
+                    if (!ssl_add_cert_to_wpacket(s, pkt, enc_cpk->x509, 0)) {
+                        X509_STORE_CTX_free(xs_ctx);
+                        return 0;
+                    }
+                }
+            }
+#endif
         }
         X509_STORE_CTX_free(xs_ctx);
     } else {
@@ -1179,6 +1189,12 @@ static int ssl_add_sm2_cert_chain(SSL *s, WPACKET *pkt, CERT_PKEY *cpk, CERT_PKE
             /* SSLfatal() already called */
             return 0;
         }
+#ifndef ENC_CERT_LAST
+        if ((enc_cpk != NULL) && (enc_cpk->x509 != NULL)) {
+            if (!ssl_add_cert_to_wpacket(s, pkt, enc_cpk->x509, 0))
+              return 0;
+        }
+#endif
         for (i = 0; i < sk_X509_num(extra_certs); i++) {
             x = sk_X509_value(extra_certs, i);
             if (!ssl_add_cert_to_wpacket(s, pkt, x, i + 1)) {
@@ -1188,12 +1204,12 @@ static int ssl_add_sm2_cert_chain(SSL *s, WPACKET *pkt, CERT_PKEY *cpk, CERT_PKE
         }
     }
     
-    //add one enc cert to cert chain by tass gujq 2018/11/2 16:37:30
-    if ((enc_cpk != NULL) && (enc_cpk->x509 != NULL))
-    {
-        if (!ssl_add_cert_to_wpacket(s, pkt, enc_cpk->x509, i + 1))
+#ifdef ENC_CERT_LAST
+    if ((enc_cpk != NULL) && (enc_cpk->x509 != NULL)) {
+        if (!ssl_add_cert_to_wpacket(s, pkt, enc_cpk->x509, 0))
             return 0;
     }
+#endif
     
     return 1;
 }
