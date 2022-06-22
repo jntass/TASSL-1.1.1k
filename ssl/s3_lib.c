@@ -2701,6 +2701,23 @@ static SSL_CIPHER ssl3_ciphers[] = {
 #endif                          /* OPENSSL_NO_GOST */
 
 #ifndef OPENSSL_NO_CNSM
+     /* Cipher E053 */
+     {
+     1,
+     TLS1_TXT_ECC_WITH_SM4_GCM_SM3,
+     NULL,
+     TLS1_CK_ECC_WITH_SM4_GCM_SM3,
+     SSL_kSM2,
+     SSL_aSM2DSA,
+     SSL_SM4GCM,
+     SSL_AEAD,
+     SM1_1_VERSION, SM1_1_VERSION,
+     0, 0,
+     SSL_HIGH,
+     SSL_HANDSHAKE_MAC_SM3 | TLS1_PRF_SM3,
+     128,
+     128,
+     },
      /* Cipher E013 */
      {
      1,
