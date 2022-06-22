@@ -170,6 +170,19 @@ static const TLS_GROUP_INFO nid_list[] = {
     {NID_brainpoolP512r1, 256, TLS_CURVE_PRIME}, /* brainpool512r1 (28) */
     {EVP_PKEY_X25519, 128, TLS_CURVE_CUSTOM}, /* X25519 (29) */
     {EVP_PKEY_X448, 224, TLS_CURVE_CUSTOM}, /* X448 (30) */
+#ifndef OPENSSL_NO_SM2
+    {NID_undef, 80, TLS_CURVE_PRIME}, /* (31) */
+    {NID_undef, 80, TLS_CURVE_PRIME}, /* (32) */
+    {NID_undef, 80, TLS_CURVE_PRIME}, /* (33) */
+    {NID_undef, 80, TLS_CURVE_PRIME}, /* (34) */
+    {NID_undef, 80, TLS_CURVE_PRIME}, /* (35) */
+    {NID_undef, 80, TLS_CURVE_PRIME}, /* (36) */
+    {NID_undef, 80, TLS_CURVE_PRIME}, /* (37) */
+    {NID_undef, 80, TLS_CURVE_PRIME}, /* (38) */
+    {NID_undef, 80, TLS_CURVE_PRIME}, /* (39) */
+    {NID_undef, 80, TLS_CURVE_PRIME}, /* (40) */
+    {NID_sm2, 128, TLS_CURVE_PRIME}, /* cureveSM2 (41) */
+#endif
 };
 
 static const unsigned char ecformats_default[] = {
@@ -185,6 +198,9 @@ static const uint16_t eccurves_default[] = {
     30,                      /* X448 (30) */
     25,                      /* secp521r1 (25) */
     24,                      /* secp384r1 (24) */
+#ifndef OPENSSL_NO_SM2
+    41,                      /* curveSM2 (41) */
+#endif
 };
 
 static const uint16_t suiteb_curves[] = {
