@@ -409,8 +409,8 @@ int main(int argc, char **argv)
     /* ----------------------------------------------- */
 
     /* dont use MIDDLEBOX for DTLS13 */
-    if(DTLS)
-      SSL_CTX_clear_options(ctx, SSL_OP_ENABLE_MIDDLEBOX_COMPAT);
+    //if(DTLS)
+      //SSL_CTX_clear_options(ctx, SSL_OP_ENABLE_MIDDLEBOX_COMPAT);
 
     /* set keylog file, maybe use for wireshark */
     SSL_CTX_set_keylog_callback(ctx, keylog_cb);

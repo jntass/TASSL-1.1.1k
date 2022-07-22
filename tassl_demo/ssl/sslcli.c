@@ -404,16 +404,16 @@ int main(int argc, char **argv)
         RETURN_SSL(err);
     }
 
-    if(DTLS)
-    {
+    //if(DTLS)
+    //{
         /* TLS13/DTLS13 PSK Hash algorithm MUST compatible with cipher suite */
-        err = SSL_CTX_set_ciphersuites(ctx, "TLS_SM4_GCM_SM3");
-        RETURN_SSL(err);
-    }
+        //err = SSL_CTX_set_ciphersuites(ctx, "TLS_SM4_GCM_SM3");
+        //RETURN_SSL(err);
+    //}
 
     /* dont use MIDDLEBOX for DTLS13 */
-    if(DTLS)
-      SSL_CTX_clear_options(ctx, SSL_OP_ENABLE_MIDDLEBOX_COMPAT);
+    //if(DTLS)
+      //SSL_CTX_clear_options(ctx, SSL_OP_ENABLE_MIDDLEBOX_COMPAT);
 
     SSL_CTX_set_psk_use_session_callback(ctx, psk_cb);
 
