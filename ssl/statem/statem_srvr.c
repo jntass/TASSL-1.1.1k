@@ -14,6 +14,7 @@
 #include "statem_local.h"
 #include "internal/constant_time.h"
 #include "internal/cryptlib.h"
+#include "internal/sockets.h"
 #include <openssl/buffer.h>
 #include <openssl/rand.h>
 #include <openssl/objects.h>
@@ -1603,6 +1604,22 @@ MSG_PROCESS_RETURN tls_process_client_hello(SSL *s, PACKET *pkt)
             goto err;
         }
 
+#ifndef OPENSSL_NO_CNSM
+        //360 browser sent TLCP ciphersuites(0xe013 and 0xe053) in tls clienthello ciphersuites to indicate
+        //that it support TLCP protocol
+        if(clienthello->legacy_version != SM1_1_VERSION && s->cert->pkeys[SSL_PKEY_SM2_ENC].x509 != NULL) {
+            uint16_t cipherid = 0;
+            int ciphersuite_len = clienthello->ciphersuites.remaining;
+            for(int i = 0; i < ciphersuite_len / 2; i++) {
+                cipherid = *(uint16_t*)(clienthello->ciphersuites.curr + i * 2);
+                if(cipherid == ntohs(TLS1_CK_ECC_WITH_SM4_SM3 & 0xffff)) {
+                    clienthello->legacy_version = SM1_1_VERSION;
+                    break;
+                }
+            }
+        }
+#endif
+
         if (!PACKET_get_length_prefixed_1(pkt, &compression)) {
             SSLfatal(s, SSL_AD_DECODE_ERROR, SSL_F_TLS_PROCESS_CLIENT_HELLO,
                      SSL_R_LENGTH_MISMATCH);
@@ -1621,6 +1638,14 @@ MSG_PROCESS_RETURN tls_process_client_hello(SSL *s, PACKET *pkt)
             }
         }
     }
+
+#ifndef OPENSSL_NO_CNSM
+    //TLCP doesn't support these two extensions
+    if(clienthello->legacy_version == SM1_1_VERSION) {
+        clienthello->pre_proc_exts[TLSEXT_IDX_supported_versions].present = 0;
+        clienthello->pre_proc_exts[TLSEXT_IDX_extended_master_secret].present = 0;
+    }
+#endif
 
     if (!PACKET_copy_all(&compression, clienthello->compressions,
                          MAX_COMPRESSIONS_SIZE,
