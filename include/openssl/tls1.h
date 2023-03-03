@@ -661,6 +661,7 @@ __owur int SSL_check_chain(SSL *s, X509 *x, EVP_PKEY *pk, STACK_OF(X509) *chain)
 #  define TLS1_CK_IBC_WITH_SM4_SM3                       0x0300E017
 #  define TLS1_CK_RSA_WITH_SM4_SM3                       0x0300E019
 #  define TLS1_CK_RSA_WITH_SM4_SHA1                      0x0300E01A
+#  define TLS1_CK_ECC_WITH_SM4_GCM_SM3                   0x0300E053
 # endif // !OPENSSL_NO_CNSM
 
 
@@ -1156,6 +1157,7 @@ __owur int SSL_check_chain(SSL *s, X509 *x, EVP_PKEY *pk, STACK_OF(X509) *chain)
 # ifndef OPENSSL_NO_CNSM
 #  define TLS1_TXT_ECDHE_WITH_SM4_SM3                    "ECDHE-SM4-SM3"
 #  define TLS1_TXT_ECC_WITH_SM4_SM3                      "ECC-SM4-SM3"
+#  define TLS1_TXT_ECC_WITH_SM4_GCM_SM3                  "ECC-SM4_GCM-SM3"
 # endif // !OPENSSL_NO_CNSM
 
 # define TLS_CT_RSA_SIGN                 1
